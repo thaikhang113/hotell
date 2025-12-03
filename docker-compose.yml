@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. DATABASE RIÊNG
+  db:
+    image: postgres:15
+    container_name: hotel_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: hotel_management
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Tự động nạp SQL từ folder backend nếu có
+      - ./backend/hotel_management.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # 2. BACKEND SERVER RIÊNG (Chạy Port 3000)
+  backend:
+    build: ./backend
+    container_name: hotel_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=hotel_management
+      - DB_PORT=5432
+      - PORT=3000
+    depends_on:
+      - db
+
+  # 3. FRONTEND WEB RIÊNG (Chạy Port 8080)
+  frontend:
+    build: ./frontend
+    container_name: hotel_frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
