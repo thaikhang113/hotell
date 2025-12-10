@@ -11,7 +11,7 @@ const BookingService = {
     createBooking: async (userId, bookingData, client = null) => {
         const { room_ids, check_in, check_out, total_guests, services } = bookingData;
 
-        // 1. Kiểm tra từng phòng (Repository đã được fix để xử lý client)
+        // 1. Kiểm tra từng phòng
         for (const roomId of room_ids) {
             const isAvailable = await BookingRepository.isRoomAvailable(roomId, check_in, check_out, client);
             if (!isAvailable) {
@@ -32,13 +32,10 @@ const BookingService = {
             const room = await Room.getById(roomId, client);
             await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night, client);
             
-            // --- ĐÃ XÓA DÒNG NÀY ---
-            // await Room.updateStatus(roomId, 'booked', client); 
-            // Lý do: Không được set cứng trạng thái phòng là 'booked', 
-            // vì sẽ làm phòng này ẩn khỏi kết quả tìm kiếm của ngày khác.
+            // ❌ ĐÃ XÓA DÒNG Room.updateStatus Ở ĐÂY ĐỂ SỬA LỖI MẤT PHÒNG
         }
 
-        // 4. Add Services (Tối ưu: Gọi getAll ra ngoài vòng lặp)
+        // 4. Add Services
         if (services && Array.isArray(services) && services.length > 0) {
             const allServices = await Service.getAll(client); 
             
@@ -59,6 +56,7 @@ const BookingService = {
         return newBooking;
     },
 
+    // ... (Giữ nguyên các hàm addServiceToRoom, checkOut bên dưới)
     addServiceToRoom: async (bookingId, serviceCode, quantity, roomId) => {
         const services = await Service.getAll();
         const selectedService = services.find(s => s.service_code === serviceCode);
@@ -82,7 +80,6 @@ const BookingService = {
 
         const bookedRooms = await Booking.getBookedRooms(bookingId);
         for (const room of bookedRooms) {
-            // Khi check-out thì chuyển sang dọn dẹp (cleanup) là hợp lý
             await Room.updateStatus(room.room_id, 'cleanup');
         }
 
