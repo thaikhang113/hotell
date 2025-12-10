@@ -1,0 +1,60 @@
+<nav class="navbar navbar-expand-lg bg-white py-3 sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/5900/5900195.png"
+        alt="Logo"
+        height="40"
+        class="me-2"
+      />
+      <span class="text-danger fw-bold fs-2">KETO</span>
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-uppercase fw-bold">
+
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/our-room">Our Room</a></li>
+        <li class="nav-item"><a class="nav-link" href="/gallery">Gallery</a></li>
+        <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact-us">Contact Us</a></li>
+
+        {{!-- ⭐ THÊM PHẦN HIỂN THỊ USER + ĐĂNG XUẤT ⭐ --}}
+        {{#if session.user}}
+
+          <li class="nav-item d-flex align-items-center ms-3">
+            <span class="fw-bold text-success">
+              👋 Xin chào, {{session.user.first_name}}
+            </span>
+          </li>
+
+          <li class="nav-item ms-3">
+            <a class="btn btn-outline-danger btn-sm" href="/auth/logout">
+              Đăng xuất
+            </a>
+          </li>
+
+        {{else}}
+
+          <li class="nav-item ms-3">
+            <a class="btn btn-outline-primary btn-sm" href="/auth/login">
+              Đăng nhập
+            </a>
+          </li>
+
+        {{/if}}
+
+      </ul>
+    </div>
+  </div>
+</nav>

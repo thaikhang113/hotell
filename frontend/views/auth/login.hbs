@@ -1,0 +1,55 @@
+{{!< main}}
+
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <div class="card shadow-sm p-4">
+      <h3 class="text-center mb-4">Đăng nhập</h3>
+
+      <form id="loginForm" method="POST">
+        <input class="form-control mb-3" name="username" placeholder="Username" required>
+        <input class="form-control mb-3" name="password" type="password" placeholder="Password" required>
+        <button class="btn btn-primary w-100" type="submit">Đăng nhập</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🔥 LOGIN SCRIPT LOADED");
+
+  const form = document.getElementById("loginForm");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = form.username.value.trim();
+    const password = form.password.value.trim();
+
+    const res = await fetch("http://217.216.72.223:3000/api/customers");
+    const users = await res.json();
+
+    console.log("🔥 API Users:", users);
+
+    const user = users.find(
+      u => u.username === username &&
+           u.password_hash === password &&
+           u.is_active &&
+           !u.is_staff
+    );
+
+    if (!user) return alert("Sai tài khoản hoặc mật khẩu!");
+
+    const save = await fetch("/auth/save-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const result = await save.json();
+    if (!result.success) return alert("Không lưu session!");
+
+    window.location.href = "/";
+  });
+});
+</script>

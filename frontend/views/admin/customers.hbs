@@ -1,0 +1,314 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold">Customer Management</h2>
+  <button
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#addCustomerModal"
+  >
+    <i class="bi bi-plus-lg"></i>
+    Add New Customer
+  </button>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone/Address</th>
+          <th>Status</th>
+          <th style="width: 150px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each customerList}}
+          <tr>
+            <td>{{this.user_id}}</td>
+            <td>{{this.username}}</td>
+            <td>{{this.first_name}} {{this.last_name}}</td>
+            <td>{{this.email}}</td>
+            <td>{{this.phone_number}}<br /><small
+                class="text-muted"
+              >{{this.address}}</small></td>
+            <td>
+              {{#if this.is_active}}
+                <span class="badge bg-success">Active</span>
+              {{else}}
+                <span class="badge bg-secondary">Inactive</span>
+              {{/if}}
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-warning me-1 btn-edit"
+                data-id="{{this.id}}"
+                data-first="{{this.first_name}}"
+                data-last="{{this.last_name}}"
+                data-email="{{this.email}}"
+                data-phone="{{this.phone_number}}"
+                data-address="{{this.address}}"
+                data-dob="{{this.date_of_birth}}"
+                data-gender="{{this.gender}}"
+                data-active="{{this.is_active}}"
+                data-bs-toggle="modal"
+                data-bs-target="#editCustomerModal"
+              >
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+
+              <form
+                action="/admin/customers/delete/{{this.user_id}}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa khách hàng {{this.username}} không?')"
+              >
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form action="/admin/customers/add" method="POST" class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Add New Customer</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required />
+          </div>
+          <div class="col">
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">First Name</label>
+            <input
+              type="text"
+              name="first_name"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="last_name" class="form-control" required />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input
+            type="text"
+            name="phone_number"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Address</label>
+          <input type="text" name="address" class="form-control" required />
+        </div>
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" name="date_of_birth" class="form-control" />
+          </div>
+          <div class="col">
+            <label class="form-label">Gender</label>
+            <select name="gender" class="form-select">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="">(None)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary">Create Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="editCustomerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editFormCustomer" method="POST" class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Update Customer Information</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" id="edit_username" class="form-control" disabled />
+        </div>
+
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">First Name</label>
+            <input
+              type="text"
+              name="first_name"
+              id="edit_first"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col">
+            <label class="form-label">Last Name</label>
+            <input
+              type="text"
+              name="last_name"
+              id="edit_last"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="edit_email"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input
+            type="text"
+            name="phone_number"
+            id="edit_phone"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Address</label>
+          <input
+            type="text"
+            name="address"
+            id="edit_address"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label">Date of Birth</label>
+            <input
+              type="date"
+              name="date_of_birth"
+              id="edit_dob"
+              class="form-control"
+            />
+          </div>
+          <div class="col">
+            <label class="form-label">Gender</label>
+            <select name="gender" id="edit_gender" class="form-select">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="">(None)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-check form-switch p-3 border rounded bg-light">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="is_active"
+            id="edit_active"
+          />
+          <label class="form-check-label fw-bold" for="edit_active">Is Active
+            Account?</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-warning">Update Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const editModal = document.getElementById('editCustomerModal');
+    if (!editModal) return;
+    editModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      if (!button) return;
+
+      const id = button.getAttribute('data-id') || '';
+      const first = button.getAttribute('data-first') || '';
+      const last = button.getAttribute('data-last') || '';
+      const email = button.getAttribute('data-email') || '';
+      const phone = button.getAttribute('data-phone') || '';
+      const address = button.getAttribute('data-address') || '';
+      const gender = button.getAttribute('data-gender') || '';
+      
+      const dobRaw = button.getAttribute('data-dob');
+      let dobFormatted = '';
+      if (dobRaw) {
+        dobFormatted = dobRaw.substring(0, 10);
+      }
+
+      const activeRaw = button.getAttribute('data-active');
+      const isActive = (activeRaw === 'true' || activeRaw === '1');
+
+      if (document.getElementById('edit_first')) document.getElementById('edit_first').value = first;
+      if (document.getElementById('edit_last')) document.getElementById('edit_last').value = last;
+      if (document.getElementById('edit_email')) document.getElementById('edit_email').value = email;
+      if (document.getElementById('edit_phone')) document.getElementById('edit_phone').value = phone;
+      if (document.getElementById('edit_address')) document.getElementById('edit_address').value = address;
+      if (document.getElementById('edit_dob')) document.getElementById('edit_dob').value = dobFormatted;
+      if (document.getElementById('edit_gender')) document.getElementById('edit_gender').value = gender;
+      if (document.getElementById('edit_active')) document.getElementById('edit_active').checked = isActive;
+
+      const form = document.getElementById('editFormCustomer');
+      if (form) form.action = '/admin/customers/edit/' + id;
+    });
+  })();
+</script>

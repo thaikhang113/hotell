@@ -1,0 +1,190 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold">Room Type Management</h2>
+  <button
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#addRoomTypeModal"
+  >
+    <i class="bi bi-plus-lg"></i>
+    Add New Room Type
+  </button>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th style="width: 150px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each roomTypeList}}
+          <tr>
+            <td>{{this.room_type_id}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.description}}</td>
+            <td>
+              {{#if this.is_active}}
+                <span class="badge bg-success">Active</span>
+              {{else}}
+                <span class="badge bg-secondary">Inactive</span>
+              {{/if}}
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-warning me-1 btn-edit"
+                data-id="{{this.room_type_id}}"
+                data-name="{{this.name}}"
+                data-desc="{{this.description}}"
+                data-active="{{this.is_active}}"
+                data-bs-toggle="modal"
+                data-bs-target="#editRoomTypeModal"
+              >
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+
+              <form
+                action="/admin/room-types/delete/{{this.room_type_id}}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại phòng {{this.name}} không?')"
+              >
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{{! Add Modal }}
+<div class="modal fade" id="addRoomTypeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form action="/admin/room-types/add" method="POST" class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Add New Room Type</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Type Name</label>
+          <input type="text" name="name" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >Close</button>
+        <button type="submit" class="btn btn-primary">Create Room Type</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{! Edit Modal }}
+<div class="modal fade" id="editRoomTypeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editFormRoomType" method="POST" class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Update Room Type Information</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input type="hidden" name="id" id="edit_id_hidden" />
+
+        <div class="mb-3">
+          <label class="form-label">Room Type ID</label>
+          <input
+            type="text"
+            id="edit_display_id"
+            class="form-control"
+            disabled
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Type Name</label>
+          <input
+            type="text"
+            name="name"
+            id="edit_name"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            name="description"
+            id="edit_desc"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-check form-switch p-3 border rounded bg-light">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="is_active"
+            id="edit_active"
+          />
+          <label class="form-check-label fw-bold" for="edit_active">Is Active?</label>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >Close</button>
+        <button type="submit" class="btn btn-warning">Update Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () { const editModal = document.getElementById('editRoomTypeModal');
+  if (!editModal) return; editModal.addEventListener('show.bs.modal', function
+  (event) { const button = event.relatedTarget; if (!button) return; const id =
+  button.getAttribute('data-id') || ''; const name =
+  button.getAttribute('data-name') || ''; const desc =
+  button.getAttribute('data-desc') || ''; const activeRaw =
+  button.getAttribute('data-active'); const isActive = (activeRaw === "true" ||
+  activeRaw === "1"); document.getElementById('edit_display_id').value = id;
+  document.getElementById('edit_id_hidden').value = id;
+  document.getElementById('edit_name').value = name;
+  document.getElementById('edit_desc').value = desc;
+  document.getElementById('edit_active').checked = isActive; const form =
+  document.getElementById('editFormRoomType'); form.action =
+  "/admin/room-types/edit/" + id; }); })();
+</script>

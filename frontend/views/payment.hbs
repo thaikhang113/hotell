@@ -1,0 +1,81 @@
+<div class="page-header">
+  <h1>THANH TOÁN</h1>
+</div>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow border-0">
+        <div class="card-header bg-danger text-white text-center py-3">
+          <h4 class="mb-0 fw-bold">THÔNG TIN ĐẶT PHÒNG #{{booking.booking_id}}</h4>
+        </div>
+        <div class="card-body p-4">
+          
+          <div class="row">
+            <div class="col-md-6 border-end">
+              <h5 class="fw-bold text-danger mb-3">Chi tiết đơn hàng</h5>
+              <p><strong>Khách hàng:</strong> {{booking.customer_name}}</p>
+              <p><strong>Ngày nhận phòng:</strong> {{booking.check_in}}</p>
+              <p><strong>Ngày trả phòng:</strong> {{booking.check_out}}</p>
+              <p><strong>Số khách:</strong> {{booking.total_guests}}</p>
+              
+              <hr>
+              <h6 class="fw-bold">Phòng đã chọn:</h6>
+              <ul class="list-group list-group-flush mb-3">
+                {{#each booking.rooms}}
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  Phòng {{this.room_number}} ({{this.room_type}})
+                </li>
+                {{/each}}
+              </ul>
+
+              {{#if booking.services.length}}
+              <h6 class="fw-bold">Dịch vụ đi kèm:</h6>
+              <ul class="list-group list-group-flush mb-3">
+                {{#each booking.services}}
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  {{this.name}}
+                  <span class="badge bg-secondary rounded-pill">x{{this.quantity}}</span>
+                </li>
+                {{/each}}
+              </ul>
+              {{/if}}
+
+              {{#if booking.promotion_code}}
+              <div class="alert alert-success py-2">
+                <small><i class="bi bi-tag-fill"></i> Mã giảm giá: <strong>{{booking.promotion_code}}</strong></small>
+              </div>
+              {{/if}}
+
+              <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-light rounded">
+                <span class="h5 mb-0">TỔNG CỘNG:</span>
+                <span class="h4 text-danger fw-bold mb-0">{{booking.total_amount_formatted}}</span>
+              </div>
+            </div>
+
+            <div class="col-md-6 text-center d-flex flex-column justify-content-center align-items-center">
+              <h5 class="fw-bold text-primary mb-3">Quét mã để thanh toán</h5>
+              
+              <div class="p-2 border rounded d-inline-block bg-white mb-3">
+                <img src="https://img.vietqr.io/image/MB-000011112222-compact2.png?amount={{booking.total_amount}}&addInfo=THANHTOAN BOOKING {{booking.booking_id}}&accountName=KETO HOTEL" 
+                     alt="VietQR" class="img-fluid" style="max-width: 300px;">
+              </div>
+              
+              <p class="text-muted small">
+                Ngân hàng: <strong>MB Bank</strong><br>
+                STK: <strong>0000 1111 2222</strong><br>
+                Chủ TK: <strong>KETO HOTEL</strong><br>
+                Nội dung: <strong>THANHTOAN BOOKING {{booking.booking_id}}</strong>
+              </p>
+
+              <a href="/" class="btn btn-success w-100 mt-2 fw-bold">
+                <i class="bi bi-check-circle-fill me-2"></i> TÔI ĐÃ THANH TOÁN
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

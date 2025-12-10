@@ -1,0 +1,77 @@
+<section class="banner-section position-relative">
+  <img
+    src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070"
+    class="w-100 object-fit-cover"
+    style="height: 650px;"
+    alt="Banner"
+  />
+
+  <div class="container position-absolute top-50 start-50 translate-middle">
+    <div class="row">
+      <div class="col-md-5 booking-box p-4">
+        <h2 class="text-white text-uppercase mb-4 border-start border-4 border-danger ps-3">Book a Room Online</h2>
+        <form id="homeBookingForm">
+          <div class="mb-3">
+            <label class="text-white">Arrival (Check-in)</label>
+            <input type="date" id="homeCheckIn" class="form-control bg-transparent text-white border-secondary" required />
+          </div>
+          <div class="mb-3">
+            <label class="text-white">Departure (Check-out)</label>
+            <input type="date" id="homeCheckOut" class="form-control bg-transparent text-white border-secondary" required />
+          </div>
+          <div class="mb-3">
+            <label class="text-white">Guests</label>
+            <input type="number" id="homeGuests" value="1" min="1" class="form-control bg-transparent text-white border-secondary" required />
+          </div>
+
+          <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 mt-2 fw-bold">Find Available Rooms</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5 py-5">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <h2 class="fw-bold mb-4">ABOUT US</h2>
+      <p class="text-secondary">The passage experienced a surge in popularity during the 1960s when Letraset used it on their dry-transfer sheets...</p>
+      <a href="/about" class="btn btn-dark rounded-pill px-4 mt-3">Read More</a>
+    </div>
+    <div class="col-md-6 mt-4 mt-md-0">
+      <img src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2070" class="img-fluid rounded shadow" alt="About" />
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Set ngày mặc định (Hôm nay & Ngày mai)
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrow = tomorrowDate.toISOString().split('T')[0];
+
+    const elCheckIn = document.getElementById("homeCheckIn");
+    const elCheckOut = document.getElementById("homeCheckOut");
+
+    elCheckIn.value = today;
+    elCheckIn.min = today;
+    elCheckOut.value = tomorrow;
+    elCheckOut.min = tomorrow;
+
+    // 2. Chuyển hướng khi bấm Book Now
+    document.getElementById("homeBookingForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const checkIn = elCheckIn.value;
+      const checkOut = elCheckOut.value;
+      const guests = document.getElementById("homeGuests").value;
+
+      if(!checkIn || !checkOut) return alert("Vui lòng chọn ngày!");
+
+      // Chuyển hướng sang trang rooms kèm tham số trên URL
+      window.location.href = `/our-room?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`;
+    });
+  });
+</script>

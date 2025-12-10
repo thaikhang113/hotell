@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. DATABASE RIÊNG
+  # 1. DATABASE (Giữ nguyên)
   db:
     image: postgres:15
     container_name: hotel_db
@@ -12,10 +12,9 @@ services:
       POSTGRES_DB: hotel_management
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Tự động nạp SQL từ folder backend nếu có
       - ./backend/hotel_management.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # 2. BACKEND SERVER RIÊNG (Chạy Port 3000)
+  # 2. BACKEND (Giữ nguyên)
   backend:
     build: ./backend
     container_name: hotel_backend
@@ -32,13 +31,15 @@ services:
     depends_on:
       - db
 
-  # 3. FRONTEND WEB RIÊNG (Chạy Port 8080)
+  # 3. FRONTEND WEB (CẬP NHẬT CHO CODE MỚI)
   frontend:
     build: ./frontend
     container_name: hotel_frontend
     restart: always
     ports:
-      - "8080:80"
+      - "3001:3001"  # Sửa thành 3001 để khớp với code Node.js mới
+    environment:
+      - PORT=3001
     depends_on:
       - backend
 

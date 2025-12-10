@@ -1,0 +1,220 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold">Service Management</h2>
+  <button
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#addServiceModal"
+  >
+    <i class="bi bi-plus-lg"></i>
+    Add New Service
+  </button>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Code</th>
+          <th>Service Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Availability</th>
+          <th style="width: 150px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each serviceList}}
+          <tr>
+            <td>{{this.service_code}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.price_formatted}}</td>
+            <td>{{this.description}}</td>
+            <td>
+              {{#if this.availability}}
+                <span class="badge bg-success">Available</span>
+              {{else}}
+                <span class="badge bg-secondary">Unavailable</span>
+              {{/if}}
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-warning me-1 btn-edit"
+                data-id="{{this.id}}"
+                data-code="{{this.service_code}}"
+                data-name="{{this.name}}"
+                data-price="{{this.price}}"
+                data-desc="{{this.description}}"
+                data-available="{{this.availability}}"
+                data-bs-toggle="modal"
+                data-bs-target="#editServiceModal"
+              >
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+
+              <form
+                action="/admin/services/delete/{{this.id}}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa dịch vụ {{this.name}} ({{this.service_code}}) không?')"
+              >
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form action="/admin/services/add" method="POST" class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Add New Service</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Service Code</label>
+          <input
+            type="text"
+            name="service_code"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Service Name</label>
+          <input type="text" name="name" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Price (VND)</label>
+          <input
+            type="number"
+            name="price"
+            class="form-control"
+            required
+            min="0"
+            step="1000"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary">Create Service</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="editServiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editFormService" method="POST" class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Update Service Information</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Service Code</label>
+          <input type="text" id="edit_code" class="form-control" disabled />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Service Name</label>
+          <input
+            type="text"
+            name="name"
+            id="edit_name"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Price (VND)</label>
+          <input
+            type="number"
+            name="price"
+            id="edit_price"
+            class="form-control"
+            required
+            min="0"
+            step="1000"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            name="description"
+            id="edit_desc"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-check form-switch p-3 border rounded bg-light">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="availability"
+            id="edit_available"
+          />
+          <label class="form-check-label fw-bold" for="edit_available">Is
+            Available?</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-warning">Update Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const editModal = document.getElementById('editServiceModal');
+    if (!editModal) return;
+    editModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      if (!button) return;
+
+      const id = button.getAttribute('data-id') || '';
+      const code = button.getAttribute('data-code') || '';
+      const name = button.getAttribute('data-name') || '';
+      const price = button.getAttribute('data-price') || '';
+      const desc = button.getAttribute('data-desc') || '';
+
+      const availableRaw = button.getAttribute('data-available');
+      const isAvailable = (availableRaw === 'true' || availableRaw === '1');
+
+      if (document.getElementById('edit_code')) document.getElementById('edit_code').value = code;
+      if (document.getElementById('edit_name')) document.getElementById('edit_name').value = name;
+      if (document.getElementById('edit_price')) document.getElementById('edit_price').value = price;
+      if (document.getElementById('edit_desc')) document.getElementById('edit_desc').value = desc;
+      if (document.getElementById('edit_available')) document.getElementById('edit_available').checked = isAvailable;
+
+      const form = document.getElementById('editFormService');
+      if (form) form.action = '/admin/services/edit/' + id;
+    });
+  })();
+</script>

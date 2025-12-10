@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+  color: #333;
+}
+
+/* Header */
+.navbar-brand span {
+  color: #fe2a2a;
+}
+.nav-link {
+  color: #111 !important;
+  font-weight: 600;
+  margin-left: 10px;
+  transition: 0.3s;
+}
+.nav-link:hover {
+  color: #fe2a2a !important;
+}
+
+/* Banner Home */
+.booking-box {
+  background-color: rgba(0, 0, 0, 0.85); /* Màu đen trong suốt */
+  border-radius: 5px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Page Header (About, Room...) */
+.page-header {
+  background-color: #0c1119; /* Nền đen header trang con */
+  color: white;
+  padding: 80px 0;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+/* Footer */
+footer {
+  background-color: #0c1119;
+}
+.footer-heading {
+  border-bottom: 2px solid #fe2a2a;
+  display: inline-block;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+.social-icons i {
+  cursor: pointer;
+  transition: 0.3s;
+}
+.social-icons i:hover {
+  color: #fe2a2a;
+}
+.btn-danger {
+  background-color: #fe2a2a;
+  border: none;
+}
+.btn-danger:hover {
+  background-color: #d91818;
+}
