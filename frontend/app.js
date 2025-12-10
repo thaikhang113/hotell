@@ -17,7 +17,7 @@ import bookingRouter from "./routes/booking.js";
 import checkLogin from "./Middleware/checkLogin.js";
 
 const app = express();
-const port = 3001;
+const port = 8080;
 
 // Fix __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
