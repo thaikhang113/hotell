@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # Mở port 3001 (Port mặc định của app.js)
-EXPOSE 3001
+EXPOSE 8080
 
 # Lệnh chạy server
 CMD ["npm", "start"]

@@ -37,9 +37,9 @@ services:
     container_name: hotel_frontend
     restart: always
     ports:
-      - "3001:3001"  # Sửa thành 3001 để khớp với code Node.js mới
+      - "8080:8080"  # Sửa thành 3001 để khớp với code Node.js mới
     environment:
-      - PORT=3001
+      - PORT=8080
     depends_on:
       - backend
 
