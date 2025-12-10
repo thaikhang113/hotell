@@ -25,7 +25,7 @@ services:
       - DB_HOST=db
       - DB_USER=postgres
       - DB_PASSWORD=root
-      - DB_NAME=hotel_management
+      - DB_DATABASE=hotel_management
       - DB_PORT=5432
       - PORT=3000
     depends_on:
