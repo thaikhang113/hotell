@@ -12,11 +12,13 @@ const Room = {
     },
 
     getById: async (id, client) => {
-        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const dbClient = client || db; 
         const res = await dbClient.query('SELECT * FROM Rooms WHERE room_id = $1', [id]);
         return res.rows[0];
     },
 
+    // FIX: Sửa logic kiểm tra trùng lịch (Overlap)
+    // Công thức chuẩn: Booking cũ (B) trùng Lịch mới (A) nếu: (B.Start < A.End) AND (B.End > A.Start)
     getAvailable: async (checkIn, checkOut) => {
         const res = await db.query(`
             SELECT r.*, rt.name as room_type_name, r.price_per_night as base_price
@@ -30,9 +32,7 @@ const Room = {
                 JOIN Bookings b ON br.booking_id = b.booking_id
                 WHERE b.status NOT IN ('cancelled', 'rejected')
                 AND (
-                    (b.check_in <= $1 AND b.check_out >= $1) OR
-                    (b.check_in <= $2 AND b.check_out >= $2) OR
-                    ($1 <= b.check_in AND $2 >= b.check_out)
+                    b.check_in < $2 AND b.check_out > $1
                 )
             )
         `, [checkIn, checkOut]);
@@ -49,7 +49,7 @@ const Room = {
     },
 
     updateStatus: async (id, status, client) => {
-        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const dbClient = client || db; 
         const res = await dbClient.query('UPDATE Rooms SET status = $1 WHERE room_id = $2 RETURNING *', [status, id]);
         return res.rows[0];
     }

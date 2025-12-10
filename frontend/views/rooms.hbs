@@ -37,6 +37,10 @@
 </div>
 
 <script>
+  // CẤU HÌNH API URL (Nếu chạy Local thì dùng localhost, nếu VPS thì dùng IP VPS)
+  // Bạn có thể sửa dòng này thành "http://217.216.72.223:3000/api" nếu cần.
+  const API_BASE_URL = "http://localhost:3000/api"; 
+
   const today = new Date().toISOString().split('T')[0];
   const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrow = tomorrowDate.toISOString().split('T')[0];
@@ -52,9 +56,9 @@
 
   document.getElementById("searchForm").addEventListener("submit", (e) => { e.preventDefault(); loadRooms(true); });
 
-  // LOAD SERVICE TỪ PROXY LOCAL (Sửa lại dòng này để fix lỗi không hiện service)
+  // Load Service Proxy
   let availableServices = [];
-  fetch('/api/services-list') // Gọi vào route của Node frontend
+  fetch('/api/services-list')
     .then(res => res.json())
     .then(data => { availableServices = data; renderServicesInModal(); })
     .catch(err => { console.error("Lỗi tải dịch vụ:", err); document.getElementById('servicesList').innerHTML = '<div class="text-danger small">Lỗi tải dịch vụ</div>'; });
@@ -74,18 +78,32 @@
     const container = document.getElementById("roomsContainer");
     container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-danger"></div></div>`;
     try {
-      let url = "http://217.216.72.223:3000/api/rooms";
-      if (isSearch && elCheckIn.value && elCheckOut.value) url = `http://217.216.72.223:3000/api/rooms/search?checkIn=${elCheckIn.value}&checkOut=${elCheckOut.value}`;
-      const res = await fetch(url); const rooms = await res.json();
+      let url = `${API_BASE_URL}/rooms`;
+      if (isSearch && elCheckIn.value && elCheckOut.value) url = `${API_BASE_URL}/rooms/search?checkIn=${elCheckIn.value}&checkOut=${elCheckOut.value}`;
+      
+      const res = await fetch(url); 
+      if(!res.ok) throw new Error("API Error");
+      
+      const rooms = await res.json();
       container.innerHTML = "";
-      if (!rooms.length) { container.innerHTML = `<h4 class="text-center text-muted w-100">Không tìm thấy phòng trống!</h4>`; return; }
+      
+      if (!rooms || rooms.length === 0) { 
+        container.innerHTML = `<h4 class="text-center text-muted w-100 mt-4">Không tìm thấy phòng trống trong giai đoạn này!<br><small>Vui lòng chọn ngày khác.</small></h4>`; 
+        return; 
+      }
+
       rooms.forEach(room => {
         const isDisabled = isSearch ? false : (room.status !== "available");
         const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(room.price_per_night);
-        const card = `<div class="col-md-4 mb-4"><div class="card border-0 shadow-sm ${isDisabled ? "disabled-room" : ""}"><img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32" class="card-img-top" height="250" style="object-fit:cover" /><div class="card-body text-center"><h4>Room ${room.room_number} — ${room.room_type_name || "Standard"}</h4><p class="text-muted">${room.description || "Mô tả..."}</p><p><strong>Price:</strong> ${price}</p><p><strong>Max Guests:</strong> ${room.max_guests}</p>${isDisabled ? `<span class="badge bg-secondary mb-3">${room.status}</span>` : `<span class="badge bg-success mb-3">Available</span>`}<br><button onclick="openBookingModal(${room.room_id || room.id}, '${room.room_number}', '${room.room_type_name || "Standard"}', '${price}')" class="btn btn-danger w-100 rounded-pill py-2 fw-bold" ${isDisabled ? "disabled" : ""}>Book Now</button></div></div></div>`;
+        const typeName = room.room_type_name || "Standard";
+        
+        const card = `<div class="col-md-4 mb-4"><div class="card border-0 shadow-sm ${isDisabled ? "disabled-room" : ""}"><img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32" class="card-img-top" height="250" style="object-fit:cover" /><div class="card-body text-center"><h4>Room ${room.room_number} — ${typeName}</h4><p class="text-muted">${room.description || "Mô tả..."}</p><p><strong>Price:</strong> ${price}</p><p><strong>Max Guests:</strong> ${room.max_guests}</p>${isDisabled ? `<span class="badge bg-secondary mb-3">${room.status}</span>` : `<span class="badge bg-success mb-3">Available</span>`}<br><button onclick="openBookingModal(${room.room_id || room.id}, '${room.room_number}', '${typeName}', '${price}')" class="btn btn-danger w-100 rounded-pill py-2 fw-bold" ${isDisabled ? "disabled" : ""}>Book Now</button></div></div></div>`;
         container.insertAdjacentHTML("beforeend", card);
       });
-    } catch (err) { container.innerHTML = `<p class="text-danger text-center w-100">Lỗi kết nối API!</p>`; }
+    } catch (err) { 
+      console.error(err);
+      container.innerHTML = `<p class="text-danger text-center w-100 mt-4">Không thể kết nối đến máy chủ!<br><small>Vui lòng kiểm tra lại Backend Server.</small></p>`; 
+    }
   }
 
   function openBookingModal(roomId, roomNum, roomType, price) {
