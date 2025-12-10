@@ -8,18 +8,18 @@ const BookingService = {
         return await BookingRepository.findAvailableRoomsByType(roomTypeId, checkIn, checkOut);
     },
 
-    // Thêm tham số client để hỗ trợ transaction
     createBooking: async (userId, bookingData, client = null) => {
         const { room_ids, check_in, check_out, total_guests, services } = bookingData;
 
+        // 1. Kiểm tra từng phòng (Repository đã được fix để xử lý client)
         for (const roomId of room_ids) {
-            // Truyền client vào Repository
             const isAvailable = await BookingRepository.isRoomAvailable(roomId, check_in, check_out, client);
             if (!isAvailable) {
                 throw new Error(`Phòng ${roomId} không còn trống trong khoảng thời gian này`);
             }
         }
 
+        // 2. Tạo Booking
         const newBooking = await Booking.create({ 
             user_id: userId, 
             check_in, 
@@ -27,14 +27,16 @@ const BookingService = {
             total_guests 
         }, client);
 
+        // 3. Add Rooms vào Booking
         for (const roomId of room_ids) {
             const room = await Room.getById(roomId, client);
             await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night, client);
             await Room.updateStatus(roomId, 'booked', client);
         }
 
+        // 4. Add Services (Tối ưu: Gọi getAll ra ngoài vòng lặp)
         if (services && Array.isArray(services) && services.length > 0) {
-            const allServices = await Service.getAll(client);
+            const allServices = await Service.getAll(client); 
             
             for (const item of services) {
                 const selectedService = allServices.find(s => s.service_code === item.serviceCode);
@@ -54,6 +56,7 @@ const BookingService = {
     },
 
     addServiceToRoom: async (bookingId, serviceCode, quantity, roomId) => {
+        // Dùng db mặc định cho thao tác đơn lẻ
         const services = await Service.getAll();
         const selectedService = services.find(s => s.service_code === serviceCode);
         

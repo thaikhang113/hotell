@@ -1,8 +1,9 @@
 const db = require('../config/db');
 
 const BookingRepository = {
-    // Kiểm tra phòng có trống trong khoảng thời gian cụ thể không (Chính xác tuyệt đối)
-    isRoomAvailable: async (roomId, checkIn, checkOut, client = db) => {
+    // Kiểm tra phòng có trống trong khoảng thời gian cụ thể không
+    isRoomAvailable: async (roomId, checkIn, checkOut, client) => {
+        const dbClient = client || db; // FIX: Nếu client null thì dùng db
         const query = `
             SELECT COUNT(*) as count
             FROM Booked_Rooms br
@@ -15,12 +16,13 @@ const BookingRepository = {
                 ($2 <= b.check_in AND $3 >= b.check_out)
             );
         `;
-        const res = await client.query(query, [roomId, checkIn, checkOut]);
+        const res = await dbClient.query(query, [roomId, checkIn, checkOut]);
         return parseInt(res.rows[0].count) === 0;
     },
 
-    // Tìm danh sách phòng trống theo loại phòng và khoảng thời gian
+    // Tìm danh sách phòng trống theo loại phòng
     findAvailableRoomsByType: async (roomTypeId, checkIn, checkOut) => {
+        // Hàm này thường chỉ đọc, dùng db mặc định là ổn
         const query = `
             SELECT r.* FROM Rooms r
             WHERE r.room_type_id = $1 
@@ -32,9 +34,9 @@ const BookingRepository = {
                 JOIN Bookings b ON br.booking_id = b.booking_id
                 WHERE b.status NOT IN ('cancelled', 'rejected', 'completed')
                 AND (
-                    (b.check_in <= $2 AND b.check_out > $2) OR -- Check-in overlaps
-                    (b.check_in < $3 AND b.check_out >= $3) OR -- Check-out overlaps
-                    ($2 <= b.check_in AND $3 >= b.check_out)   -- Booking inside range
+                    (b.check_in <= $2 AND b.check_out > $2) OR
+                    (b.check_in < $3 AND b.check_out >= $3) OR
+                    ($2 <= b.check_in AND $3 >= b.check_out)
                 )
             );
         `;
@@ -42,7 +44,7 @@ const BookingRepository = {
         return res.rows;
     },
 
-    // Lấy lịch sử đặt phòng của khách hàng (kèm review nếu có)
+    // Lấy lịch sử đặt phòng
     getCustomerHistory: async (userId) => {
         const query = `
             SELECT 

@@ -6,7 +6,6 @@ const InvoiceRepository = require('../repositories/invoiceRepository');
 const { sendInvoiceEmail } = require('../utils/email');
 
 const InvoiceService = {
-    // Thêm tham số client
     calculateTotal: async (bookingId, promoCode, client = null) => {
         const booking = await Booking.getById(bookingId, client);
         if (!booking) throw new Error("Booking not found when calculating invoice");
@@ -14,7 +13,6 @@ const InvoiceService = {
         const bookedRooms = await Booking.getBookedRooms(bookingId, client);
         const usedServices = await Service.getUsedByBooking(bookingId, client);
 
-        // Calculate Room Cost
         const checkIn = new Date(booking.check_in);
         const checkOut = new Date(booking.check_out);
         const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)) || 1;
@@ -24,7 +22,6 @@ const InvoiceService = {
             totalRoomCost += parseFloat(room.price_at_booking) * nights;
         });
 
-        // Calculate Service Cost
         let totalServiceCost = 0;
         usedServices.forEach(s => {
             totalServiceCost += parseFloat(s.service_price) * s.quantity;
@@ -34,7 +31,6 @@ const InvoiceService = {
         let discountAmount = 0;
         let promotionId = null;
 
-        // Apply Promotion
         if (promoCode) {
             const promo = await Promotion.findByCode(promoCode, client);
             if (promo) {
@@ -87,11 +83,7 @@ const InvoiceService = {
             await Promotion.incrementUsage(calculation.promotionId, client);
         }
 
-        // Send email asynchronously (Chỉ gửi khi transaction thành công, nhưng ở đây gửi luôn cũng được vì try/catch ở controller)
-        // Lưu ý: InvoiceRepository dùng db mặc định, có thể không thấy dữ liệu trong transaction.
-        // Nên chỉ gửi email SAU KHI commit transaction ở controller nếu muốn chắc chắn.
-        // Tạm thời để ở đây nhưng bọc trong setImmediate để không block
-        if (!client) { // Chỉ gửi email nếu không trong transaction, hoặc xử lý sau
+        if (!client) { 
              const invoiceDetail = await InvoiceRepository.getInvoiceDetailFull(newInvoice.invoice_id);
              if (invoiceDetail && invoiceDetail.info.email) {
                  sendInvoiceEmail(invoiceDetail.info.email, newInvoice).catch(console.error);

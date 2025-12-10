@@ -11,8 +11,9 @@ const Room = {
         return res.rows;
     },
 
-    getById: async (id, client = db) => {
-        const res = await client.query('SELECT * FROM Rooms WHERE room_id = $1', [id]);
+    getById: async (id, client) => {
+        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const res = await dbClient.query('SELECT * FROM Rooms WHERE room_id = $1', [id]);
         return res.rows[0];
     },
 
@@ -47,8 +48,9 @@ const Room = {
         return res.rows[0];
     },
 
-    updateStatus: async (id, status, client = db) => {
-        const res = await client.query('UPDATE Rooms SET status = $1 WHERE room_id = $2 RETURNING *', [status, id]);
+    updateStatus: async (id, status, client) => {
+        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const res = await dbClient.query('UPDATE Rooms SET status = $1 WHERE room_id = $2 RETURNING *', [status, id]);
         return res.rows[0];
     }
 };
