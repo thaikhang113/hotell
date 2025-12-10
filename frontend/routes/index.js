@@ -1,9 +1,10 @@
 import siteController from "../controllers/siteController.js";
 import bookingController from "../controllers/bookingController.js";
+import serviceController from "../controllers/serviceController.js"; // Import thêm
 import checkLogin from "../Middleware/checkLogin.js";
+import express from "express"; // Import express
 
 function route(app) {
-  // Chặn toàn bộ site trừ /auth/*
   app.use((req, res, next) => {
     if (req.path.startsWith("/auth")) return next();
     return checkLogin(req, res, next);
@@ -16,8 +17,10 @@ function route(app) {
   app.get("/blog", siteController.blog);
   app.get("/contact-us", siteController.contact);
 
-  // Route Trang thanh toán (Mới)
   app.get("/payment/:id", bookingController.showPayment);
+  
+  // Route Proxy lấy dịch vụ (MỚI)
+  app.get("/api/services-list", serviceController.getServiceListProxy);
 }
 
 export default route;

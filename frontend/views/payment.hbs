@@ -68,9 +68,9 @@
                 Nội dung: <strong>THANHTOAN BOOKING {{booking.booking_id}}</strong>
               </p>
 
-              <a href="/" class="btn btn-success w-100 mt-2 fw-bold">
+              <button onclick="confirmPaid({{booking.booking_id}}, {{booking.invoice_id}})" class="btn btn-success w-100 mt-2 fw-bold">
                 <i class="bi bi-check-circle-fill me-2"></i> TÔI ĐÃ THANH TOÁN
-              </a>
+              </button>
             </div>
           </div>
 
@@ -79,3 +79,28 @@
     </div>
   </div>
 </div>
+
+<script>
+  async function confirmPaid(bookingId, invoiceId) {
+    if (!confirm("Bạn xác nhận đã chuyển khoản thành công?")) return;
+
+    try {
+      const res = await fetch("/booking/confirm-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, invoiceId })
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        alert("Cảm ơn! Hệ thống đã ghi nhận thanh toán.");
+        window.location.href = "/";
+      } else {
+        alert("Lỗi: " + result.message);
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!");
+      console.error(err);
+    }
+  }
+</script>

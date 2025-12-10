@@ -31,7 +31,11 @@ const BookingService = {
         for (const roomId of room_ids) {
             const room = await Room.getById(roomId, client);
             await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night, client);
-            await Room.updateStatus(roomId, 'booked', client);
+            
+            // --- ĐÃ XÓA DÒNG NÀY ---
+            // await Room.updateStatus(roomId, 'booked', client); 
+            // Lý do: Không được set cứng trạng thái phòng là 'booked', 
+            // vì sẽ làm phòng này ẩn khỏi kết quả tìm kiếm của ngày khác.
         }
 
         // 4. Add Services (Tối ưu: Gọi getAll ra ngoài vòng lặp)
@@ -56,7 +60,6 @@ const BookingService = {
     },
 
     addServiceToRoom: async (bookingId, serviceCode, quantity, roomId) => {
-        // Dùng db mặc định cho thao tác đơn lẻ
         const services = await Service.getAll();
         const selectedService = services.find(s => s.service_code === serviceCode);
         
@@ -79,6 +82,7 @@ const BookingService = {
 
         const bookedRooms = await Booking.getBookedRooms(bookingId);
         for (const room of bookedRooms) {
+            // Khi check-out thì chuyển sang dọn dẹp (cleanup) là hợp lý
             await Room.updateStatus(room.room_id, 'cleanup');
         }
 

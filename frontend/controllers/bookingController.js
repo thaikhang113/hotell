@@ -16,7 +16,6 @@ class BookingController {
         return res.status(400).json({ success: false, message: "Thiếu thông tin đặt phòng!" });
       }
 
-      // Payload đầy đủ gửi sang Backend
       const payload = {
         user_id: parseInt(req.session.user.user_id || req.session.user.id), 
         room_ids: [parseInt(roomId)],
@@ -43,18 +42,16 @@ class BookingController {
     }
   }
 
-  // Hiển thị trang Thanh toán (QR)
+  // Hiển thị trang Thanh toán
   async showPayment(req, res) {
     try {
       const bookingId = req.params.id;
       
-      // Gọi API Backend lấy chi tiết Booking để hiển thị số tiền
       const response = await axios.get(`${API_URL}/bookings/${bookingId}`);
       const booking = response.data;
 
       if (!booking) return res.redirect('/');
 
-      // Format lại tiền tệ để hiển thị đẹp
       booking.total_amount_formatted = new Intl.NumberFormat('vi-VN', { 
         style: 'currency', currency: 'VND' 
       }).format(booking.total_amount);
@@ -67,6 +64,24 @@ class BookingController {
     } catch (error) {
       console.error("Payment Page Error:", error.message);
       res.redirect('/');
+    }
+  }
+
+  // Xác nhận thanh toán (MỚI)
+  async confirmPayment(req, res) {
+    try {
+      const { bookingId, invoiceId } = req.body;
+
+      // Gọi API Backend để update trạng thái Invoice thành 'paid'
+      await axios.put(`${API_URL}/invoices/${invoiceId}/payment`, {
+        status: 'paid',
+        method: 'transfer' // Mặc định là chuyển khoản
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Confirm Payment Error:", error.message);
+      res.status(500).json({ success: false, message: "Lỗi cập nhật thanh toán" });
     }
   }
 }
