@@ -7,5 +7,5 @@ router.get('/:id', serviceController.getServiceById);
 router.post('/', serviceController.createService);
 router.put('/:id', serviceController.updateService);
 router.delete('/:id', serviceController.deleteService);
-
+router.get('/list', serviceController.getServiceList);
 module.exports = router;

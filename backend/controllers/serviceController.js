@@ -81,7 +81,17 @@ const ServiceController = {
             }
             res.status(500).json({ error: err.message });
         }
+    },
+    
+    getServiceList: async (req, res) => {
+        try {
+            const services = await Service.getAll();
+            res.json(services);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
+    
 };
 
 module.exports = ServiceController;
