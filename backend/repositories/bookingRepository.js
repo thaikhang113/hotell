@@ -1,28 +1,23 @@
 const db = require('../config/db');
 
 const BookingRepository = {
-    // Kiểm tra phòng có trống trong khoảng thời gian cụ thể không
     isRoomAvailable: async (roomId, checkIn, checkOut, client) => {
-        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const dbClient = client || db; 
         const query = `
             SELECT COUNT(*) as count
             FROM Booked_Rooms br
             JOIN Bookings b ON br.booking_id = b.booking_id
             WHERE br.room_id = $1
-            AND b.status NOT IN ('cancelled', 'rejected', 'completed')
+            AND b.status NOT IN ('cancelled', 'rejected') 
             AND (
-                (b.check_in <= $2 AND b.check_out > $2) OR
-                (b.check_in < $3 AND b.check_out >= $3) OR
-                ($2 <= b.check_in AND $3 >= b.check_out)
+                b.check_in < $3 AND b.check_out > $2
             );
         `;
         const res = await dbClient.query(query, [roomId, checkIn, checkOut]);
         return parseInt(res.rows[0].count) === 0;
     },
 
-    // Tìm danh sách phòng trống theo loại phòng
     findAvailableRoomsByType: async (roomTypeId, checkIn, checkOut) => {
-        // Hàm này thường chỉ đọc, dùng db mặc định là ổn
         const query = `
             SELECT r.* FROM Rooms r
             WHERE r.room_type_id = $1 
@@ -32,11 +27,9 @@ const BookingRepository = {
                 SELECT br.room_id 
                 FROM Booked_Rooms br
                 JOIN Bookings b ON br.booking_id = b.booking_id
-                WHERE b.status NOT IN ('cancelled', 'rejected', 'completed')
+                WHERE b.status NOT IN ('cancelled', 'rejected')
                 AND (
-                    (b.check_in <= $2 AND b.check_out > $2) OR
-                    (b.check_in < $3 AND b.check_out >= $3) OR
-                    ($2 <= b.check_in AND $3 >= b.check_out)
+                    b.check_in < $3 AND b.check_out > $2
                 )
             );
         `;
@@ -44,7 +37,6 @@ const BookingRepository = {
         return res.rows;
     },
 
-    // Lấy lịch sử đặt phòng
     getCustomerHistory: async (userId) => {
         const query = `
             SELECT 

@@ -37,9 +37,7 @@
 </div>
 
 <script>
-  // CẤU HÌNH API URL (Nếu chạy Local thì dùng localhost, nếu VPS thì dùng IP VPS)
-  // Bạn có thể sửa dòng này thành "http://217.216.72.223:3000/api" nếu cần.
-  const API_BASE_URL = "http://localhost:3000/api/rooms"; 
+  const API_BASE_URL = "http://localhost:3000/api"; 
 
   const today = new Date().toISOString().split('T')[0];
   const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -56,7 +54,6 @@
 
   document.getElementById("searchForm").addEventListener("submit", (e) => { e.preventDefault(); loadRooms(true); });
 
-  // Load Service Proxy
   let availableServices = [];
   fetch('/api/services-list')
     .then(res => res.json())

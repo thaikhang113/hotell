@@ -16,8 +16,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("🔥 LOGIN SCRIPT LOADED");
-
   const form = document.getElementById("loginForm");
 
   form.addEventListener("submit", async (e) => {
@@ -26,30 +24,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = form.username.value.trim();
     const password = form.password.value.trim();
 
-    const res = await fetch("http://217.216.72.223:3000/api/customers");
-    const users = await res.json();
+    try {
+      const save = await fetch("/auth/save-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
 
-    console.log("🔥 API Users:", users);
-
-    const user = users.find(
-      u => u.username === username &&
-           u.password_hash === password &&
-           u.is_active &&
-           !u.is_staff
-    );
-
-    if (!user) return alert("Sai tài khoản hoặc mật khẩu!");
-
-    const save = await fetch("/auth/save-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-
-    const result = await save.json();
-    if (!result.success) return alert("Không lưu session!");
-
-    window.location.href = "/";
+      const result = await save.json();
+      
+      if (result.success) {
+        window.location.href = "/";
+      } else {
+        alert(result.error || "Sai tài khoản hoặc mật khẩu!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối server!");
+    }
   });
 });
 </script>

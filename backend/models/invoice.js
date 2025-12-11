@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 const Invoice = {
     create: async (data, client) => {
-        const dbClient = client || db; // FIX: Nếu client null thì dùng db
+        const dbClient = client || db;
         const { booking_id, staff_id, total_room, total_service, discount, final_total, promo_id } = data;
         const res = await dbClient.query(
             `INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost, discount_amount, final_amount, promotion_id, payment_status) 

@@ -1,10 +1,8 @@
 import axios from "axios";
 
-// API URL của Backend
-const API_URL = "http://217.216.72.223:3000/api/services";
+const API_URL = "http://backend:3000/api/services";
 
 class ServiceController {
-  // [GET] /admin/services
   async listServices(req, res) {
     try {
       const response = await axios.get(API_URL);
@@ -32,7 +30,6 @@ class ServiceController {
     }
   }
 
-  // [POST] /admin/services/add
   async addService(req, res) {
     try {
       const payload = {
@@ -49,7 +46,6 @@ class ServiceController {
     }
   }
 
-  // [POST] /admin/services/edit/:id
   async updateService(req, res) {
     const id = req.params.id;
     try {
@@ -67,7 +63,6 @@ class ServiceController {
     }
   }
 
-  // [POST] /admin/services/delete/:id
   async deleteService(req, res) {
     try {
       await axios.delete(`${API_URL}/${req.params.id}`);
@@ -77,10 +72,8 @@ class ServiceController {
     }
   }
 
-  // [GET] /services/proxy-list (MỚI: Dùng cho Modal đặt phòng)
   async getServiceListProxy(req, res) {
     try {
-      // Gọi sang backend lấy list services
       const response = await axios.get(`${API_URL}/list`);
       res.json(response.data);
     } catch (error) {

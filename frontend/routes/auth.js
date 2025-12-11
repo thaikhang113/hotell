@@ -15,7 +15,6 @@ router.post("/save-session", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // ✅ SỬA: Gọi nội bộ sang container backend cổng 3000
     const apiRes = await fetch("http://backend:3000/api/customers");
     const users = await apiRes.json();
 

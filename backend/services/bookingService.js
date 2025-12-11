@@ -11,15 +11,13 @@ const BookingService = {
     createBooking: async (userId, bookingData, client = null) => {
         const { room_ids, check_in, check_out, total_guests, services } = bookingData;
 
-        // 1. Kiểm tra từng phòng
         for (const roomId of room_ids) {
             const isAvailable = await BookingRepository.isRoomAvailable(roomId, check_in, check_out, client);
             if (!isAvailable) {
-                throw new Error(`Phòng ${roomId} không còn trống trong khoảng thời gian này`);
+                throw new Error(`Phòng ${roomId} đã được đặt trong khoảng thời gian này`);
             }
         }
 
-        // 2. Tạo Booking
         const newBooking = await Booking.create({ 
             user_id: userId, 
             check_in, 
@@ -27,15 +25,11 @@ const BookingService = {
             total_guests 
         }, client);
 
-        // 3. Add Rooms vào Booking
         for (const roomId of room_ids) {
             const room = await Room.getById(roomId, client);
             await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night, client);
-            
-            // ❌ ĐÃ XÓA DÒNG Room.updateStatus Ở ĐÂY ĐỂ SỬA LỖI MẤT PHÒNG
         }
 
-        // 4. Add Services
         if (services && Array.isArray(services) && services.length > 0) {
             const allServices = await Service.getAll(client); 
             
@@ -56,11 +50,9 @@ const BookingService = {
         return newBooking;
     },
 
-    // ... (Giữ nguyên các hàm addServiceToRoom, checkOut bên dưới)
     addServiceToRoom: async (bookingId, serviceCode, quantity, roomId) => {
         const services = await Service.getAll();
         const selectedService = services.find(s => s.service_code === serviceCode);
-        
         if (!selectedService) throw new Error('Dịch vụ không tồn tại');
 
         return await Service.addUsedService({
@@ -82,7 +74,6 @@ const BookingService = {
         for (const room of bookedRooms) {
             await Room.updateStatus(room.room_id, 'cleanup');
         }
-
         return true;
     }
 };

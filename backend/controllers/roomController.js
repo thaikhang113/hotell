@@ -1,7 +1,6 @@
 const Room = require('../models/room');
 
 const RoomController = {
-    // API: Lấy danh sách phòng (Có hỗ trợ tìm kiếm)
     getAllRooms: async (req, res) => {
         try {
             const rooms = await Room.getAll();
@@ -11,15 +10,12 @@ const RoomController = {
         }
     },
 
-    // API: Tìm phòng trống theo ngày
     searchAvailableRooms: async (req, res) => {
         try {
             const { checkIn, checkOut } = req.query;
-
             if (!checkIn || !checkOut) {
                 return res.status(400).json({ message: "Vui lòng cung cấp checkIn và checkOut" });
             }
-
             const rooms = await Room.getAvailable(checkIn, checkOut);
             res.json(rooms);
         } catch (error) {
@@ -47,10 +43,9 @@ const RoomController = {
         }
     },
 
-    updateRoomStatus: async (req, res) => {
+    updateRoom: async (req, res) => {
         try {
-            const { status } = req.body;
-            const updatedRoom = await Room.updateStatus(req.params.id, status);
+            const updatedRoom = await Room.update(req.params.id, req.body);
             res.json(updatedRoom);
         } catch (error) {
             res.status(400).json({ message: error.message });
@@ -59,11 +54,20 @@ const RoomController = {
 
     deleteRoom: async (req, res) => {
         try {
-            // Logic xóa phòng (cần cẩn thận nếu phòng đã có booking)
-            // Tạm thời chưa implement deep delete để an toàn
-            res.status(501).json({ message: "Delete method not implemented yet for safety" });
+            await Room.delete(req.params.id);
+            res.json({ message: "Deleted successfully" });
         } catch (error) {
             res.status(500).json({ message: error.message });
+        }
+    },
+
+    updateRoomStatus: async (req, res) => {
+        try {
+            const { status } = req.body;
+            const updatedRoom = await Room.updateStatus(req.params.id, status);
+            res.json(updatedRoom);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
         }
     }
 };

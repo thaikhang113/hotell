@@ -17,8 +17,6 @@ const Room = {
         return res.rows[0];
     },
 
-    // FIX: Sửa logic kiểm tra trùng lịch (Overlap)
-    // Công thức chuẩn: Booking cũ (B) trùng Lịch mới (A) nếu: (B.Start < A.End) AND (B.End > A.Start)
     getAvailable: async (checkIn, checkOut) => {
         const res = await db.query(`
             SELECT r.*, rt.name as room_type_name, r.price_per_night as base_price
@@ -42,10 +40,25 @@ const Room = {
     create: async (data) => {
         const { room_number, room_type_id, floor, price_per_night, description } = data;
         const res = await db.query(
-            'INSERT INTO Rooms (room_number, room_type_id, floor, price_per_night, description) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [room_number, room_type_id, floor, price_per_night, description]
+            'INSERT INTO Rooms (room_number, room_type_id, floor, price_per_night, description, status, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [room_number, room_type_id, floor, price_per_night, description, 'available', true]
         );
         return res.rows[0];
+    },
+
+    update: async (id, data) => {
+        const { room_number, room_type_id, floor, price_per_night, description, status, is_active } = data;
+        const res = await db.query(
+            `UPDATE Rooms 
+             SET room_number = $1, room_type_id = $2, floor = $3, price_per_night = $4, description = $5, status = $6, is_active = $7
+             WHERE room_id = $8 RETURNING *`,
+            [room_number, room_type_id, floor, price_per_night, description, status, is_active, id]
+        );
+        return res.rows[0];
+    },
+
+    delete: async (id) => {
+        await db.query('DELETE FROM Rooms WHERE room_id = $1', [id]);
     },
 
     updateStatus: async (id, status, client) => {

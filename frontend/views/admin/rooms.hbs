@@ -1,0 +1,183 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Quản lý Phòng</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+        <i class="bi bi-plus-lg"></i> Thêm phòng mới
+    </button>
+</div>
+
+{{#if error}}
+<div class="alert alert-danger">{{error}}</div>
+{{/if}}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Số phòng</th>
+                    <th>Loại phòng</th>
+                    <th>Tầng</th>
+                    <th>Giá (Đêm)</th>
+                    <th>Trạng thái</th>
+                    <th>Kích hoạt</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each rooms}}
+                <tr>
+                    <td class="fw-bold">{{this.room_number}}</td>
+                    <td>{{this.room_type_name}}</td>
+                    <td>{{this.floor}}</td>
+                    <td class="text-danger fw-bold">{{this.price_formatted}}</td>
+                    <td>
+                        {{#if (eq this.status 'available')}}
+                            <span class="badge bg-success">Trống</span>
+                        {{else}}
+                            {{#if (eq this.status 'booked')}}
+                                <span class="badge bg-danger">Đã đặt</span>
+                            {{else}}
+                                <span class="badge bg-warning text-dark">{{this.status}}</span>
+                            {{/if}}
+                        {{/if}}
+                    </td>
+                    <td>
+                        {{#if this.is_active}}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {{else}}
+                            <i class="bi bi-x-circle-fill text-secondary"></i>
+                        {{/if}}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" 
+                                onclick="openEditModal('{{this.room_id}}', '{{this.room_number}}', '{{this.room_type_id}}', '{{this.floor}}', '{{this.price_per_night}}', '{{this.status}}', '{{this.is_active}}', '{{this.description}}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <a href="/admin/rooms/delete/{{this.room_id}}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa phòng này?');">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="addRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admin/rooms/add" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm Phòng Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Số phòng</label>
+                        <input type="text" name="room_number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Loại phòng</label>
+                        <select name="room_type_id" class="form-select" required>
+                            {{#each roomTypes}}
+                            <option value="{{this.room_type_id}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tầng</label>
+                            <input type="number" name="floor" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Giá mỗi đêm (VNĐ)</label>
+                            <input type="number" name="price_per_night" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editRoomForm" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cập nhật Phòng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Số phòng</label>
+                        <input type="text" id="edit_room_number" name="room_number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Loại phòng</label>
+                        <select id="edit_room_type_id" name="room_type_id" class="form-select" required>
+                            {{#each roomTypes}}
+                            <option value="{{this.room_type_id}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tầng</label>
+                            <input type="number" id="edit_floor" name="floor" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Giá mỗi đêm</label>
+                            <input type="number" id="edit_price" name="price_per_night" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select id="edit_status" name="status" class="form-select">
+                            <option value="available">Trống (Available)</option>
+                            <option value="booked">Đã đặt (Booked)</option>
+                            <option value="cleanup">Đang dọn (Cleanup)</option>
+                            <option value="maintenance">Bảo trì (Maintenance)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_is_active" name="is_active">
+                        <label class="form-check-label" for="edit_is_active">Kích hoạt sử dụng</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea id="edit_description" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-warning">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditModal(id, number, typeId, floor, price, status, isActive, desc) {
+        document.getElementById('editRoomForm').action = '/admin/rooms/edit/' + id;
+        document.getElementById('edit_room_number').value = number;
+        document.getElementById('edit_room_type_id').value = typeId;
+        document.getElementById('edit_floor').value = floor;
+        document.getElementById('edit_price').value = price;
+        document.getElementById('edit_status').value = status;
+        document.getElementById('edit_is_active').checked = (isActive === 'true');
+        document.getElementById('edit_description').value = desc;
+        
+        new bootstrap.Modal(document.getElementById('editRoomModal')).show();
+    }
+</script>
