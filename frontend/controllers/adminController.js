@@ -9,8 +9,17 @@ class AdminController {
   async getStaff(req, res) {
     try {
       const response = await axios.get(`${API_URL}/staff`);
-      res.render("admin/staff", { layout: "admin", staffList: response.data });
+      
+      const staffList = Array.isArray(response.data) 
+        ? response.data.map(staff => ({
+            ...staff,
+            id: staff.user_id 
+          }))
+        : [];
+
+      res.render("admin/staff", { layout: "admin", staffList: staffList });
     } catch (error) {
+      console.error(error); // Nên log lỗi ra để debug
       res.render("admin/staff", { layout: "admin", error: "Lỗi tải nhân viên" });
     }
   }
@@ -60,6 +69,7 @@ class AdminController {
       res.send("Lỗi xóa nhân viên: " + (error.response?.data?.error || error.message));
     }
   }
+  
 
   // --- ROOMS (MỚI) ---
   async getRooms(req, res) {
