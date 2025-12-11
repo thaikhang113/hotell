@@ -9,12 +9,16 @@ const router = express.Router();
 
 router.get("/", (req, res) => res.render("admin/dashboard", { layout: "admin" }));
 
-// Staff
 router.get("/staff", adminController.getStaff);
+router.post("/staff/add", adminController.addStaff);          // <-- THÊM MỚI ROUTE NÀY
+router.post("/staff/edit/:id", adminController.updateStaff);  // <-- THÊM MỚI ROUTE NÀY
+router.post("/staff/delete/:id", adminController.deleteStaff);// <-- THÊM MỚI ROUTE NÀY
 
-// Customers
+// --- CUSTOMERS (KHÁCH HÀNG) ---
 router.get("/customers", customerController.listCustomers);
-
+router.post("/customers/add", customerController.addCustomer);       // <-- THÊM MỚI ROUTE NÀY
+router.post("/customers/edit/:id", customerController.updateCustomer); // <-- THÊM MỚI ROUTE NÀY
+router.post("/customers/delete/:id", customerController.deleteCustomer);
 // Services
 router.get("/services", serviceController.listServices);
 router.post("/services/add", serviceController.addService);

@@ -14,6 +14,52 @@ class AdminController {
       res.render("admin/staff", { layout: "admin", error: "Lỗi tải nhân viên" });
     }
   }
+  async addStaff(req, res) {
+    try {
+      // Gửi dữ liệu từ form sang Backend API
+      await axios.post(`${API_URL}/staff`, {
+        username: req.body.username,
+        password: req.body.password,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        email: req.body.email,
+        phone_number: req.body.phone_number
+      });
+      res.redirect("/admin/staff");
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message;
+      res.send("Lỗi thêm nhân viên: " + msg);
+    }
+  }
+
+  async updateStaff(req, res) {
+    try {
+      const id = req.params.id;
+      // Xử lý checkbox active (nếu tick -> 'on', không tick -> undefined)
+      const isActive = req.body.is_active === 'on';
+      
+      await axios.put(`${API_URL}/staff/${id}`, {
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        email: req.body.email,
+        phone_number: req.body.phone_number,
+        is_active: isActive
+      });
+      res.redirect("/admin/staff");
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message;
+      res.send("Lỗi cập nhật nhân viên: " + msg);
+    }
+  }
+
+  async deleteStaff(req, res) {
+    try {
+      await axios.delete(`${API_URL}/staff/${req.params.id}`);
+      res.redirect("/admin/staff");
+    } catch (error) {
+      res.send("Lỗi xóa nhân viên: " + (error.response?.data?.error || error.message));
+    }
+  }
 
   // --- ROOMS (MỚI) ---
   async getRooms(req, res) {
